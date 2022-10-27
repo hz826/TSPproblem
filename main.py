@@ -1,6 +1,6 @@
-from tkinter.tix import MAX
 import matplotlib.pyplot as plt
 import numpy as np
+import itertools
 import random
 import time
 
@@ -71,6 +71,45 @@ class TSPproblem :
                 scores.append(self.TSPdistance(best_path))
         
         print('HC :', self.TSPdistance(best_path))
+        return (best_path, (times, scores))
+
+    def HC2(self, MAX_iter) : # 爬山算法
+        start_time = time.time()
+        times = []
+        scores = []
+
+        best_path = np.random.permutation(range(self.n))
+
+        for iter in range(MAX_iter) :
+            if iter % 10000 == 0 :
+                print('iter :', iter)
+            
+            next_path = best_path.copy()
+
+            index = np.sort(np.random.permutation(range(1,self.n))[:3])
+            p = [next_path[index[2]:        ],
+                 next_path[        :index[0]],
+                 next_path[index[0]:index[1]],
+                 next_path[index[1]:index[2]]]
+            
+            (best_q, best_length) = ([], 1e9)
+            for q in itertools.permutations([1,2,3]) :
+                qq = [0] + list(q)
+                length_now = sum(self.G[p[qq[i-1]][-1]][p[qq[i]][0]] for i in range(4))
+
+                if length_now < best_length :
+                    (best_q, best_length) = (qq, length_now)
+            
+            next_path = np.concatenate([p[best_q[i]] for i in range(4)])
+
+            if self.TSPdistance(next_path) < self.TSPdistance(best_path) :
+                best_path = next_path.copy()
+            
+            if (iter / MAX_iter * 1000 < int((iter+1) / MAX_iter * 1000)) :
+                times.append(time.time() - start_time)
+                scores.append(self.TSPdistance(best_path))
+        
+        print('HC2 :', self.TSPdistance(best_path))
         return (best_path, (times, scores))
 
     def ACO(self, AntCount, MAX_iter) : # 蚁群算法
@@ -145,8 +184,8 @@ class TSPproblem :
             """
             #信息素的增加量矩阵
             changepheromonetable = np.zeros((self.n, self.n))
-            for i in range(AntCount):
-                for j in range(self.n):
+            for i in range(AntCount) :
+                for j in range(self.n) :
                     # 当前路径之间的信息素的增量：1/当前蚂蚁行走的总距离的信息素
                     changepheromonetable[next_path[i][j-1]][next_path[i][j]] += Q / length[i]
             
@@ -170,14 +209,15 @@ TSP.load('g40.txt')
 path1 = [i for i in range(TSP.n)]
 random.shuffle(path1)
 
-path2, g2 = TSP.HC(200000)
-path3, g3 = TSP.ACO(150, 200)
-
+path2, g2 = TSP.HC(500000)
 TSP.show(131, path2)
-TSP.show(132, path3)
-
 plt.subplot(133)
 plt.plot(g2[0], g2[1])
+
+# path3, g3 = TSP.ACO(150, 200)
+path3, g3 = TSP.HC2(500000)
+TSP.show(132, path3)
+plt.subplot(133)
 plt.plot(g3[0], g3[1])
 
 plt.show()
