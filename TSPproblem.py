@@ -25,11 +25,12 @@ class TSPproblem :
         assert self.points.shape == (self.n, 2)
         self.get_distance()
 
-    def show(self, subplot_id, path=[]) :
+    def show(self, subplot_id1, path=[], subplot_id2=0, graph=(), title="") :
         X = self.points.T[0]
         Y = self.points.T[1]
 
-        plt.subplot(subplot_id)
+        plt.subplot(subplot_id1)
+        plt.xlabel(title)
         plt.scatter(X, Y)
 
         if path.any() :
@@ -37,9 +38,15 @@ class TSPproblem :
             XX = [X[path[i]] for i in range(-1,self.n)]
             YY = [Y[path[i]] for i in range(-1,self.n)]
             plt.plot(XX, YY)
+        
+        if subplot_id2 != 0 :
+            plt.subplot(subplot_id2)
+            plt.plot(graph[0], graph[1], label=title)
+
     
     def TSPdistance(self, path) :
         return sum(self.G[path[i-1]][path[i]] for i in range(self.n))
     
     from HC import HC
     from ACO import ACO
+    from GA import GA

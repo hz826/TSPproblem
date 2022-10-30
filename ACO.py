@@ -1,16 +1,17 @@
 import numpy as np
 import time
 
-def ACO(self, AntCount, MAX_iter) : # 蚁群算法
+def ACO(self, AntCount, MAX_iter, alpha=1, beta=2, gamma=1, Q=1, rho=0.1) : # 蚁群算法
     start_time = time.time()
     times = []
     scores = []
     
     # 信息素
-    alpha = 1 # 信息素重要程度因子
-    beta = 2  # 启发函数重要程度因子
-    rho = 0.1 # 挥发速度
-    Q = 1
+    # alpha = 1 # 信息素重要程度因子
+    # beta = 2  # 启发函数重要程度因子
+    # gamma = 1 # 负反馈因子
+    # rho = 0.1 # 挥发速度
+    # Q = 1
     # 初始信息素矩阵，全是为1组成的矩阵
     pheromonetable = np.ones((self.n, self.n))
 
@@ -42,7 +43,7 @@ def ACO(self, AntCount, MAX_iter) : # 蚁群算法
                     # 计算当前城市到剩余城市的（信息素浓度^alpha）*（城市适应度的倒数）^beta
                     # 预处理减少重复运算
                     P[i][j] = np.power(pheromonetable[i][j], alpha) * \
-                                np.power(1.0 / self.G[i][j], beta)
+                              np.power(1.0 / self.G[i][j], beta)
 
         # second：选择下一个城市选择
         for i in range(AntCount) :
@@ -72,16 +73,17 @@ def ACO(self, AntCount, MAX_iter) : # 蚁群算法
             信息素的更新
         """
         #信息素的增加量矩阵
-        changepheromonetable = np.zeros((self.n, self.n))
+        change = np.zeros((self.n, self.n))
         for i in range(AntCount) :
             for j in range(self.n) :
                 # 当前路径之间的信息素的增量：1/当前蚂蚁行走的总距离的信息素
-                changepheromonetable[next_path[i][j-1]][next_path[i][j]] += Q / length[i]
+                change[next_path[i][j-1]][next_path[i][j]] += Q / length[i] * (1 if i < gamma*AntCount else -1)
         
         #信息素更新的公式：
-        pheromonetable = (1 - rho) * pheromonetable + changepheromonetable
+        pheromonetable = (1 - rho) * pheromonetable + change
+        pheromonetable[pheromonetable < 0.001] = 0.001
 
-        if True :
+        if len(times) == 0 or time.time()-start_time - times[-1] > 0.1 :
             times.append(time.time() - start_time)
             scores.append(self.TSPdistance(best_path))
     

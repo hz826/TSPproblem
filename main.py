@@ -1,23 +1,25 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from TSPproblem import TSPproblem
+plt.rcParams["font.family"] = ["sans-serif"]
+plt.rcParams["font.sans-serif"] = ['SimHei']
 
 TSP = TSPproblem()
-# TSP.generate(10)
-# TSP.save('g10.txt')
-TSP.load('g60.txt')
+TSP.generate(100)
+TSP.save('g100.txt')
+# TSP.load('g40.txt')
 
 
-path, graph = TSP.HC(500000)
-TSP.show(131, path)
+path, graph = TSP.ACO(100, 200)
+TSP.show(131, path, 133, graph, "改进前")
+
+path, graph = TSP.ACO(100, 200, gamma=0.9, Q=5)
+TSP.show(132, path, 133, graph, "改进后")
+
+
 plt.subplot(133)
-plt.plot(graph[0], graph[1])
+plt.xlabel('时间/s')
+plt.ylabel('最优解')
 
-
-path, graph = TSP.ACO(150, 200)
-TSP.show(132, path)
-plt.subplot(133)
-plt.plot(graph[0], graph[1])
-
- 
+plt.legend()
 plt.show()
