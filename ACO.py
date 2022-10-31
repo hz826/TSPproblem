@@ -72,16 +72,20 @@ def ACO(self, AntCount, MAX_iter, alpha=1, beta=2, gamma=1, Q=1, rho=0.1) : # �
         """
             信息素的更新
         """
+
+        AntID = sorted([i for i in range(AntCount)], key = lambda x : length[x])
+
         #信息素的增加量矩阵
         change = np.zeros((self.n, self.n))
-        for i in range(AntCount) :
+        for ii in range(AntCount) :
+            i = AntID[ii]
             for j in range(self.n) :
                 # 当前路径之间的信息素的增量：1/当前蚂蚁行走的总距离的信息素
-                change[next_path[i][j-1]][next_path[i][j]] += Q / length[i] * (1 if i < gamma*AntCount else -1)
+                change[next_path[i][j-1]][next_path[i][j]] += Q / length[i] * (1 if ii < gamma*AntCount else -1)
         
         #信息素更新的公式：
         pheromonetable = (1 - rho) * pheromonetable + change
-        pheromonetable[pheromonetable < 0.001] = 0.001
+        pheromonetable[pheromonetable < 0.00001] = 0.00001
 
         if len(times) == 0 or time.time()-start_time - times[-1] > 0.1 :
             times.append(time.time() - start_time)
